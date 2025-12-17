@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    # Инструкция: собрать образ из текущей папки (по Dockerfile)
+    build: . 
+    # Проброс порта: 8000 на компьютере -> 8000 в контейнере
+    ports:
+      - "8000:8000"
+    # Настройки для подключения к БД
+    environment:
+      POSTGRES_HOST: db # Имя хоста - это имя сервиса БД
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    # Запустить app только после того, как запустится db
+    depends_on:
+      - db
+    restart: always 
+
+  db:
+    # Использовать официальный образ PostgreSQL
+    image: postgres:15-alpine
+    # Настройки для БД
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    # Проброс порта для внешнего доступа (опционально)
+    ports:
+      - "5432:5432"
+    # Использование именованного тома для сохранения данных БД
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+# Определение именованного тома
+volumes:
+  postgres_data:
